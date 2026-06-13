@@ -145,7 +145,7 @@ button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; tran
     background: #fff;
 }
 
-/* ── 🍳 بخش استایل باکس گیف آشپز ── */
+/* ── 🍳 بخش استایل باکس گیف جدید باب اسفنجی ── */
 .chef-gif-container {
     display: flex;
     justify-content: center;
@@ -155,11 +155,14 @@ button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; tran
     border: 2px dashed #ffedd5;
     padding: 10px;
     margin-bottom: 20px;
+    overflow: hidden;
 }
 
 .chef-gif {
-    width: 140px;
+    width: 100%;
+    max-width: 260px;
     height: auto;
+    border-radius: 8px;
     object-fit: contain;
 }
 
@@ -267,9 +270,9 @@ small { color: var(--text-muted); font-size: 13px; }
     </div>
 
     <div class="cart">
-        <!-- ── 👨‍🍳 باکس گیف آشپز در حال پخت برگر ── -->
+        <!-- ── 👨‍🍳 باکس گیف درخواستی باب اسفنجی همبرگر پز ── -->
         <div class="chef-gif-container">
-            <img class="chef-gif" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZXQ2dzI3a3Z2OTB3bzRmd2k4bHpyZ3k4ZzlpdTByazFmdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Mdf56uOasYnIofV1R1/giphy.gif" alt="آشپز شاد">
+            <img class="chef-gif" src="https://media.tenor.com/7gK2OofwKz0AAAAC/spongebob-fry-cook.gif" alt="باب اسفنجی آشپز">
         </div>
 
         <h2>🛒 سبد خرید شما</h2>
