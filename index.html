@@ -1,10 +1,3 @@
-یک آشپز متحرک و گوگولی به بالای بخش سبد خرید (دقیقاً جایی که کاربر می‌خواهد فاکتور را ببیند) اضافه شد!
-
-این آشپز با کلاه سرآشپز و کفگیرش، یک همبرگر خوشمزه را به صورت انیمیشن دائم رو به بالا و پایین پرتاب می‌کند تا محیط سایت را جذاب‌تر و زنده‌تر کند.
-
-کد کامل و نهایی `index.html` را از باکس زیر کپی کنید:
-
-```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -118,7 +111,6 @@ button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; tran
     border-radius: 20px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border);
-    position: relative;
 }
 
 .cart-item {
@@ -153,47 +145,22 @@ button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; tran
     background: #fff;
 }
 
-/* 👨‍🍳 استایل انیمیشن آشپز گوگولی و همبرگر */
-.chef-container {
+/* ── 🍳 بخش استایل باکس گیف آشپز ── */
+.chef-gif-container {
     display: flex;
     justify-content: center;
-    align-items: flex-end;
-    height: 90px;
-    margin-bottom: 10px;
-    position: relative;
+    align-items: center;
+    background: #fff7ed;
+    border-radius: 16px;
+    border: 2px dashed #ffedd5;
+    padding: 10px;
+    margin-bottom: 20px;
 }
 
-.chef-emoji {
-    font-size: 45px;
-    position: relative;
-    z-index: 2;
-}
-
-.spatula-emoji {
-    font-size: 22px;
-    position: absolute;
-    right: 46%;
-    bottom: 12px;
-    transform: rotate(-20deg);
-    z-index: 3;
-}
-
-.burger-emoji {
-    font-size: 24px;
-    position: absolute;
-    left: 49%;
-    bottom: 35px;
-    z-index: 1;
-    animation: flipBurger 1.8s infinite ease-in-out;
-}
-
-/* انیمیشن بالا و پایین رفتن و چرخش ملایم همبرگر */
-@keyframes flipBurger {
-    0% { bottom: 35px; transform: scale(1) rotate(0deg); }
-    40% { bottom: 95px; transform: scale(1.2) rotate(180deg); }
-    50% { bottom: 95px; transform: scale(1.2) rotate(180deg); }
-    90% { bottom: 35px; transform: scale(1) rotate(360deg); }
-    100% { bottom: 35px; transform: scale(1) rotate(360deg); }
+.chef-gif {
+    width: 140px;
+    height: auto;
+    object-fit: contain;
 }
 
 .modal {
@@ -300,11 +267,9 @@ small { color: var(--text-muted); font-size: 13px; }
     </div>
 
     <div class="cart">
-        <!-- 👨‍🍳 سرآشپز متحرک در حال بالا پایین کردن برگر -->
-        <div class="chef-container">
-            <div class="burger-emoji">🍔</div>
-            <div class="spatula-emoji">🍳</div>
-            <div class="chef-emoji">👨‍🍳</div>
+        <!-- ── 👨‍🍳 باکس گیف آشپز در حال پخت برگر ── -->
+        <div class="chef-gif-container">
+            <img class="chef-gif" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZhcHoxZXQ2dzI3a3Z2OTB3bzRmd2k4bHpyZ3k4ZzlpdTByazFmdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Mdf56uOasYnIofV1R1/giphy.gif" alt="آشپز شاد">
         </div>
 
         <h2>🛒 سبد خرید شما</h2>
@@ -369,7 +334,6 @@ small { color: var(--text-muted); font-size: 13px; }
 <!-- مدال نمایش فاکتور و تایید سریع -->
 <div class="modal" id="success-modal">
     <div class="modal-content" style="text-align: center;">
-        <span style="font-size: 50px;">🎉</span>
         <h3 style="color: var(--success); margin-top: 10px;">سفارش شما با موفقیت ثبت شد!</h3>
         <p style="font-size: 14px; color: var(--text-muted);">خلاصه فاکتور ارسالی شما به آشپزخانه:</p>
         
@@ -387,7 +351,7 @@ const customizableIngredients = ["سس مخصوص", "خیارشور", "کاهو"
 
 const basePrices = {
     chicken: { name: "ساندویچ مرغ", price: 540000 },
-    turkey: { name: "ساندویچ bوقلمون", price: 620000 },
+    turkey: { name: "ساندویچ بوقلمون", price: 620000 },
     fries: { name: "سیب زمینی", price: 50000 }
 };
 
@@ -645,5 +609,3 @@ function submitOrder(){
 
 </body>
 </html>
-
-```
