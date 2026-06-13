@@ -1,3 +1,10 @@
+یک آشپز متحرک و گوگولی به بالای بخش سبد خرید (دقیقاً جایی که کاربر می‌خواهد فاکتور را ببیند) اضافه شد!
+
+این آشپز با کلاه سرآشپز و کفگیرش، یک همبرگر خوشمزه را به صورت انیمیشن دائم رو به بالا و پایین پرتاب می‌کند تا محیط سایت را جذاب‌تر و زنده‌تر کند.
+
+کد کامل و نهایی `index.html` را از باکس زیر کپی کنید:
+
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -111,6 +118,7 @@ button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; tran
     border-radius: 20px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border);
+    position: relative;
 }
 
 .cart-item {
@@ -143,6 +151,49 @@ button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; tran
     outline: none;
     border-color: var(--primary);
     background: #fff;
+}
+
+/* 👨‍🍳 استایل انیمیشن آشپز گوگولی و همبرگر */
+.chef-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 90px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.chef-emoji {
+    font-size: 45px;
+    position: relative;
+    z-index: 2;
+}
+
+.spatula-emoji {
+    font-size: 22px;
+    position: absolute;
+    right: 46%;
+    bottom: 12px;
+    transform: rotate(-20deg);
+    z-index: 3;
+}
+
+.burger-emoji {
+    font-size: 24px;
+    position: absolute;
+    left: 49%;
+    bottom: 35px;
+    z-index: 1;
+    animation: flipBurger 1.8s infinite ease-in-out;
+}
+
+/* انیمیشن بالا و پایین رفتن و چرخش ملایم همبرگر */
+@keyframes flipBurger {
+    0% { bottom: 35px; transform: scale(1) rotate(0deg); }
+    40% { bottom: 95px; transform: scale(1.2) rotate(180deg); }
+    50% { bottom: 95px; transform: scale(1.2) rotate(180deg); }
+    90% { bottom: 35px; transform: scale(1) rotate(360deg); }
+    100% { bottom: 35px; transform: scale(1) rotate(360deg); }
 }
 
 .modal {
@@ -194,7 +245,6 @@ small { color: var(--text-muted); font-size: 13px; }
     border-top: 2px solid var(--border);
 }
 
-/* استایل باکس تایید نهایی و خلاصه سفارش سریع */
 .receipt-box {
     background: #f0fdf4;
     border: 2px solid #bbf7d0;
@@ -250,6 +300,13 @@ small { color: var(--text-muted); font-size: 13px; }
     </div>
 
     <div class="cart">
+        <!-- 👨‍🍳 سرآشپز متحرک در حال بالا پایین کردن برگر -->
+        <div class="chef-container">
+            <div class="burger-emoji">🍔</div>
+            <div class="spatula-emoji">🍳</div>
+            <div class="chef-emoji">👨‍🍳</div>
+        </div>
+
         <h2>🛒 سبد خرید شما</h2>
         <div id="cart" style="margin-bottom: 20px;"></div>
 
@@ -285,7 +342,6 @@ small { color: var(--text-muted); font-size: 13px; }
 
         <div id="total-container"></div>
 
-        <!-- شناسه دکمه برای مدیریت وضعیت سرعت و قفل شدن اضافه شد -->
         <button id="submit-btn" onclick="submitOrder()" style="width: 100%; padding: 14px; margin-top: 10px; font-size: 16px; border-radius: 12px;">🚀 ثبت نهایی سفارش</button>
     </div>
 
@@ -331,7 +387,7 @@ const customizableIngredients = ["سس مخصوص", "خیارشور", "کاهو"
 
 const basePrices = {
     chicken: { name: "ساندویچ مرغ", price: 540000 },
-    turkey: { name: "ساندویچ بوقلمون", price: 620000 },
+    turkey: { name: "ساندویچ bوقلمون", price: 620000 },
     fries: { name: "سیب زمینی", price: 50000 }
 };
 
@@ -536,7 +592,6 @@ function submitOrder(){
         return;
     }
 
-    // ⚡ ضد اسپم: دکمه سریعاً غیرفعال می‌شود تا جلوی کلیک‌های مکرر و سفارش تکراری گرفته شود
     submitBtn.disabled = true;
     submitBtn.innerHTML = "⏳ در حال ارسال سفارش...";
 
@@ -558,7 +613,6 @@ function submitOrder(){
         total: totalAmount
     };
 
-    // ساخت فاکتور متنی شیک برای نمایش سریع به کاربر
     let receiptHtml = `
         <div class="receipt-title">📋 جزئیات فاکتور شماره سیستم</div>
         <b>👤 تحویل گیرنده:</b> ${name}<br>
@@ -572,11 +626,9 @@ function submitOrder(){
         method:"POST",
         body: JSON.stringify(data)
     }).then(() => {
-        // باز کردن پاپ‌آپ سریع اطلاعات فاکتور
         document.getElementById("receipt-details").innerHTML = receiptHtml;
         document.getElementById("success-modal").style.display = "flex";
         
-        // ریست کردن فرم
         cart=[];
         render();
         document.getElementById("name").value = "";
@@ -585,7 +637,6 @@ function submitOrder(){
         alert("متاسفانه خطایی در ثبت سفارش رخ داد.");
         console.error(err);
     }).finally(() => {
-        // فعال‌سازی مجدد دکمه بعد از پایان عملیات کامپیوتر
         submitBtn.disabled = false;
         submitBtn.innerHTML = "🚀 ثبت نهایی سفارش";
     });
@@ -594,3 +645,5 @@ function submitOrder(){
 
 </body>
 </html>
+
+```
