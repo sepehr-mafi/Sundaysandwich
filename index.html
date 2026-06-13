@@ -1,333 +1,608 @@
+برای اینکه سیستم همزمان با سرعت فوق‌العاده بالا کار کند و جلوی سفارش‌های تکراری یا اسپم را بگیرد، کدهای دکمه ثبت سفارش را بهینه‌سازی کردم.
+
+حالا به محض اینکه کاربر روی دکمه کلیک کند:
+۱. **دکمه فوراً قفل و غیرفعال می‌شود** (تا کاربر نتواند چند بار پشت سر هم روی آن کلیک کند و سفارش تکراری ثبت شود).
+۲. **متن دکمه به «در حال ارسال...» تغییر می‌کند.**
+۳. **یک باکس پیام زیبا (Popup)** به جای `alert` ساده طراحی کردم که دقیقاً به کاربر می‌گوید چه چیزی سفارش داده و چقدر باید پرداخت کند.
+
+کد کامل و آپدیت شده فایل `index.html` را از باکس زیر جایگزین کنید:
+
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ساندی سندویچ</title>
+<title>ساندی سندویچ | سفارش آنلاین</title>
 
 <style>
-body{font-family:sans-serif;background:#f5f5f5;margin:0}
-header{background:#ff6b00;color:#fff;padding:20px;text-align:center}
-
-.container{max-width:900px;margin:auto;padding:20px}
-
-.card{
-background:#fff;
-padding:12px;
-margin:10px 0;
-border-radius:10px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+:root {
+    --primary: #ff5e00;
+    --primary-hover: #e05200;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+    --success: #10b981;
+    --warning-bg: #fff7ed;
+    --warning-border: #ffedd5;
+    --warning-text: #c2410c;
 }
 
-button{
-background:#ff6b00;
-color:#fff;
-border:none;
-padding:6px 10px;
-border-radius:8px;
-cursor:pointer;
-margin:2px;
+*{ box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+
+body { background: var(--bg); color: var(--text); margin: 0; padding-bottom: 60px; line-height: 1.6; }
+
+header { 
+    background: linear-gradient(135deg, var(--primary), #ff8400); 
+    color: #fff; 
+    padding: 35px 20px; 
+    text-align: center; 
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: 0 4px 20px rgba(255, 94, 0, 0.2);
 }
 
-.cart{
-background:#fff;
-padding:15px;
-margin-top:20px;
-border-radius:10px;
+header h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+
+.container { max-width: 768px; margin: auto; padding: 20px; }
+
+.notice-banner {
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    color: var(--warning-text);
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 4px rgba(249, 115, 22, 0.05);
 }
 
-/* ── 🍳 استایل باکس اختصاصی گیف باب اسفنجی شما ── */
-.chef-gif-container {
-display: flex;
-justify-content: center;
-align-items: center;
-background: #fffdf9;
-border: 2px dashed #ffe0b2;
-border-radius: 10px;
-padding: 10px;
-margin-bottom: 15px;
-overflow: hidden;
+h2, h3, h4 { font-weight: 700; color: var(--text); margin-top: 0; }
+h2 { font-size: 22px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+.menu-section { margin-bottom: 32px; }
+
+.card {
+    background: var(--surface);
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.chef-gif {
-width: 100%;
-max-width: 240px;
-height: auto;
-border-radius: 6px;
-object-fit: contain;
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
 }
 
-.modal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.6);
-justify-content:center;
-align-items:center;
+.card-info { display: flex; flex-direction: column; gap: 4px; }
+.card-title { font-weight: 600; font-size: 16px; }
+.card-price { color: var(--primary); font-weight: 700; font-size: 15px; }
+
+button {
+    font-family: inherit;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor:pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
-.modal-content{
-background:#fff;
-padding:20px;
-border-radius:10px;
-width:340px;
+button:hover { background: var(--primary-hover); transform: scale(1.02); }
+button:active { transform: scale(0.98); }
+button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; }
+
+.btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: #e2e8f0; }
+
+.cart {
+    background: var(--surface);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
 }
 
-small{color:#555}
+.cart-item {
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--border);
+}
+.cart-item:last-child { border-bottom: none; }
+.cart-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.cart-item-name { font-weight: 600; }
+.cart-item-actions { display: flex; align-items: center; gap: 8px; }
+.btn-qty { width: 28px; height: 28px; padding: 0; border-radius: 50px; font-size: 16px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #475569; }
+
+.cart input, .cart select {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    background: #f8fafc;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.cart input:focus, .cart select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+}
+
+.modal {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    justify-content:center;
+    align-items:center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content {
+    background: var(--surface);
+    padding: 24px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.custom-option {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+}
+.custom-option input { margin-left: 10px; width: 18px; height: 18px; accent-color: var(--primary); }
+
+small { color: var(--text-muted); font-size: 13px; }
+.removed-items { color: var(--danger); font-size: 12px; font-weight: 500; }
+.addons-items { color: var(--success); font-size: 12px; font-weight: 500; }
+
+.total-price {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 800;
+    font-size: 18px;
+    margin: 20px 0;
+    padding-top: 15px;
+    border-top: 2px solid var(--border);
+}
+
+/* استایل باکس تایید نهایی و خلاصه سفارش سریع */
+.receipt-box {
+    background: #f0fdf4;
+    border: 2px solid #bbf7d0;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-align: right;
+}
+.receipt-title { font-weight: 700; color: #166534; border-bottom: 1px dashed #bbf7d0; padding-bottom: 8px; margin-bottom: 8px; }
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🍔 ساندی سندویچ</h1>
+    <h1>🍔 ساندی سندویچ</h1>
 </header>
 
 <div class="container">
 
-<h2>منو</h2>
+    <div class="notice-banner">
+        <span>⏰</span>
+        <span>ثبت سفارش برای «همان روز» فقط تا ساعت ۱۱:۰۰ صبح امکان‌پذیر است. پس از این ساعت، می‌توانید سفارش خود را برای فردا یا پس‌فردا رزرو کنید.</span>
+    </div>
 
-<div class="card">
-<span>ساندویچ مرغ - 540000</span>
-<div>
-<button onclick="openView('chicken')">👁 سفارشی‌سازی</button>
-<button onclick="add('مرغ',540000,'chicken')">افزودن</button>
+    <div class="menu-section">
+        <h2>🍽 منوی غذا</h2>
+
+        <div class="card">
+            <div class="card-info">
+                <span class="card-title">ساندویچ مرغ ویژه</span>
+                <span class="card-price">۵۴۰,۰۰۰ تومان</span>
+            </div>
+            <button onclick="openView('chicken')">👁 سفارشی‌سازی و خرید</button>
+        </div>
+
+        <div class="card">
+            <div class="card-info">
+                <span class="card-title">ساندویچ بوقلمون ویژه</span>
+                <span class="card-price">۶۲۰,۰۰۰ تومان</span>
+            </div>
+            <button onclick="openView('turkey')">👁 سفارشی‌سازی و خرید</button>
+        </div>
+
+        <div class="card">
+            <div class="card-info">
+                <span class="card-title">سیب زمینی سرخ‌کرده</span>
+                <span class="card-price">۵۰,۰۰۰ تومان</span>
+            </div>
+            <button onclick="openView('fries')">👁 سفارشی‌سازی و خرید</button>
+        </div>
+    </div>
+
+    <div class="cart">
+        <h2>🛒 سبد خرید شما</h2>
+        <div id="cart" style="margin-bottom: 20px;"></div>
+
+        <div class="form-group">
+            <label>نام و نام خانوادگی</label>
+            <input id="name" placeholder="مثال: علی محمدی">
+        </div>
+        
+        <div class="form-group">
+            <label>شماره تماس</label>
+            <input id="phone" type="tel" placeholder="مثال: 09123456789" style="text-align: left; direction: ltr;">
+        </div>
+
+        <h3>📅 زمان تحویل سفارش</h3>
+        <div class="form-group">
+            <label for="delivery-date">انتخاب روز</label>
+            <select id="delivery-date"></select>
+            <div id="time-warning-msg" style="margin-top: 6px;"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="delivery-time">انتخاب ساعت تحویل</label>
+            <select id="delivery-time">
+                <option value="12:00">12:00</option>
+                <option value="12:30">12:30</option>
+                <option value="13:00">13:00</option>
+                <option value="13:30">13:30</option>
+                <option value="14:00">14:00</option>
+                <option value="14:30">14:30</option>
+                <option value="15:00">15:00</option>
+            </select>
+        </div>
+
+        <div id="total-container"></div>
+
+        <!-- شناسه دکمه برای مدیریت وضعیت سرعت و قفل شدن اضافه شد -->
+        <button id="submit-btn" onclick="submitOrder()" style="width: 100%; padding: 14px; margin-top: 10px; font-size: 16px; border-radius: 12px;">🚀 ثبت نهایی سفارش</button>
+    </div>
+
 </div>
-</div>
 
-<div class="card">
-<span>ساندویچ بوقلمون - 620000</span>
-<div>
-<button onclick="openView('turkey')">👁 سفارشی‌سازی</button>
-<button onclick="add('بوقلمون',620000,'turkey')">افزودن</button>
-</div>
-</div>
-
-<div class="card">
-<span>سیب زمینی - 50000</span>
-<div>
-<button onclick="openView('fries')">👁 سفارشی‌سازی</button>
-<button onclick="add('سیب زمینی',50000,'fries')">افزودن</button>
-</div>
-</div>
-
-<div class="cart">
-
-<div class="chef-gif-container">
-<img class="chef-gif" src="https://raw.githubusercontent.com/sepehr-mafi/Sundaysandwich/main/spongebob-fry-cook.gif" alt="باب اسفنجی آشپز">
-</div>
-
-<h2>🛒 سبد خرید</h2>
-<div id="cart"></div>
-
-<input id="name" placeholder="نام">
-<input id="phone" placeholder="شماره">
-
-<button onclick="submitOrder()">ثبت سفارش</button>
-
-</div>
-
-</div>
-
+<!-- مدال سفارشی‌سازی غذا -->
 <div class="modal" id="modal">
-<div class="modal-content">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 8px;">🛠 سفارشی‌سازی ترکیب</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">ترکیبات مورد نظر خود را شخصی‌سازی کنید.</p>
+        
+        <div id="ingredients"></div>
 
-<h3>سفارشی‌سازی</h3>
-<div id="ingredients"></div>
+        <div id="addons-section">
+            <h4 style="margin-top: 20px; margin-bottom: 10px;">➕ افزودنی‌های دلخواه</h4>
+            <div id="addons"></div>
+        </div>
 
-<hr>
-<h4>➕ افزودنی‌ها</h4>
-<div id="addons"></div>
-
-<br>
-<button onclick="closeView()">بستن</button>
-
+        <br>
+        <button id="add-to-cart-btn" style="background: var(--success); width: 100%; padding: 12px; font-size: 15px; border-radius: 12px;">افزودن به سبد خرید</button>
+        <button onclick="closeView()" class="btn-secondary" style="width: 100%; padding: 10px; margin-top: 8px; border-radius: 12px;">انصراف</button>
+    </div>
 </div>
+
+<!-- مدال نمایش فاکتور و تایید سریع -->
+<div class="modal" id="success-modal">
+    <div class="modal-content" style="text-align: center;">
+        <span style="font-size: 50px;">🎉</span>
+        <h3 style="color: var(--success); margin-top: 10px;">سفارش شما با موفقیت ثبت شد!</h3>
+        <p style="font-size: 14px; color: var(--text-muted);">خلاصه فاکتور ارسالی شما به آشپزخانه:</p>
+        
+        <div class="receipt-box" id="receipt-details"></div>
+        
+        <button onclick="closeSuccessModal()" style="background: var(--text); width: 100%; padding: 12px; border-radius: 12px;">فهمیدم، بستن مانیتور</button>
+    </div>
 </div>
 
 <script>
-
 let cart = [];
 let currentType = null;
 
-// 🟢 مواد ثابت (قابل حذف نیستند برای مرغ و بوقلمون)
-const baseIngredients = {
-chicken:[
-"مرغ 300 گرم",
-"سس مخصوص",
-"خیارشور",
-"کاهو",
-"گوجه",
-"نان"
-],
-turkey:[
-"بوقلمون 300 گرم",
-"سس مخصوص",
-"خیارشور",
-"کاهو",
-"گوجه",
-"نان"
-],
-fries:[
-"سیب زمینی تازه"
-]
+const customizableIngredients = ["سس مخصوص", "خیارشور", "کاهو", "گوجه"];
+
+const basePrices = {
+    chicken: { name: "ساندویچ مرغ", price: 540000 },
+    turkey: { name: "ساندویچ بوقلمون", price: 620000 },
+    fries: { name: "سیب زمینی", price: 50000 }
 };
 
-// 🟢 افزودنی‌ها فقط برای سیب زمینی
-const friesAddons = [
-{name:"ژامبون", price:120000},
-{name:"سس تند", price:5000},
-{name:"ابرکامبو (سس قارچ + سس تند + سوسیس + پنیر)", price:170000}
-];
-
+let currentRemovedIngredients = [];
 let selectedAddons = [];
 
-// 👁 باز کردن
+const friesAddons = [
+    {name:"ژامبون", price:120000},
+    {name:"سس تند", price:5000},
+    {name:"ابرکامبو (سس قارچ + سس تند + ژامبون + پنیر)", price:150000} 
+];
+
+function setupDeliveryDates() {
+    const dateSelect = document.getElementById("delivery-date");
+    const warningMsg = document.getElementById("time-warning-msg");
+    dateSelect.innerHTML = "";
+    
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    if (currentHour < 11) {
+        dateSelect.innerHTML += `<option value="امروز">امروز</option>`;
+        warningMsg.innerHTML = "";
+    } else {
+        warningMsg.innerHTML = `<span style="color: var(--danger); font-size: 12px; font-weight: 500;">⚠️ با توجه به گذشتن از ساعت ۱۱:۰۰ صبح، سفارش‌گیری برای امروز به پایان رسیده است.</span>`;
+    }
+    dateSelect.innerHTML += `<option value="فردا">فردا</option>`;
+    dateSelect.innerHTML += `<option value="پس‌فردا">پس‌فردا</option>`;
+}
+
+setupDeliveryDates();
+
 function openView(type){
-currentType = type;
-
-renderModal();
-
-document.getElementById("modal").style.display="flex";
+    currentType = type;
+    currentRemovedIngredients = [];
+    selectedAddons = [];
+    
+    renderModal();
+    document.getElementById("modal").style.display="flex";
 }
 
 function closeView(){
-document.getElementById("modal").style.display="none";
+    document.getElementById("modal").style.display="none";
 }
 
-// 🧾 نمایش محتویات
+function closeSuccessModal() {
+    document.getElementById("success-modal").style.display = "none";
+}
+
 function renderModal(){
+    let ingredientsHtml = "";
+    const addonsSection = document.getElementById("addons-section");
+    const addToCartBtn = document.getElementById("add-to-cart-btn");
 
-let html = "";
+    if(currentType === "fries"){
+        ingredientsHtml = "<div style='padding: 10px; background: #f0fdf4; color: #166534; border-radius: 10px; font-size: 14px;'><b>🍟 سیب زمینی تازه بیسیک</b><br>ترکیب اصلی قابل تغییر نیست اما می‌توانید افزودنی انتخاب کنید.</div>";
+        addonsSection.style.display = "block";
+        
+        document.getElementById("addons").innerHTML = friesAddons.map((a,i)=>`
+            <label class="custom-option">
+                <input type="checkbox" onchange="toggleAddon(${i})">
+                <span>${a.name} <small>(+${a.price.toLocaleString()} تومان)</small></span>
+            </label>
+        `).join("");
+    } else {
+        addonsSection.style.display = "none";
+        ingredientsHtml = `<b style="font-size:14px; display:block; margin-bottom:10px;">تیک موادی که می‌خواهید در ساندویچ باشد را بزنید:</b>`;
+        
+        ingredientsHtml += customizableIngredients.map(ing => `
+            <label class="custom-option">
+                <input type="checkbox" checked onchange="toggleIngredient('${ing}')">
+                <span>${ing}</span>
+            </label>
+        `).join("");
+    }
 
-// فقط برای سیب زمینی ادیت
-if(currentType === "fries"){
-html += "<b>سیب زمینی</b><br>غیر قابل حذف<br><br>";
-
-document.getElementById("addons").innerHTML =
-friesAddons.map((a,i)=>`
-<label>
-<input type="checkbox" onchange="toggleAddon(${i})">
-${a.name} (+${a.price.toLocaleString()})
-</label><br>
-`).join("");
-
-}else{
-
-html += baseIngredients[currentType].map(i=>`• ${i}`).join("<br>");
-document.getElementById("addons").innerHTML = "فقط برای سیب زمینی فعال است";
+    document.getElementById("ingredients").innerHTML = ingredientsHtml;
+    
+    addToCartBtn.onclick = function() {
+        const itemInfo = basePrices[currentType];
+        add(itemInfo.name, itemInfo.price, currentType);
+        closeView();
+    };
 }
 
-document.getElementById("ingredients").innerHTML = html;
+function toggleIngredient(ing) {
+    const index = currentRemovedIngredients.indexOf(ing);
+    if (index > -1) {
+        currentRemovedIngredients.splice(index, 1);
+    } else {
+        currentRemovedIngredients.push(ing);
+    }
 }
 
-// 🟡 افزودنی سیب زمینی
 function toggleAddon(i){
-
-let addon = friesAddons[i];
-
-let index = selectedAddons.findIndex(a=>a.name===addon.name);
-
-if(index >= 0){
-selectedAddons.splice(index,1);
-}else{
-selectedAddons.push(addon);
-}
+    let addon = friesAddons[i];
+    let index = selectedAddons.findIndex(a=>a.name===addon.name);
+    if(index >= 0){
+        selectedAddons.splice(index,1);
+    }else{
+        selectedAddons.push(addon);
+    }
 }
 
-// ➕ افزودن
 function add(name, price, type){
+    let addonsPrice = 0;
+    let addonsText = "";
+    let removedText = "";
 
-let addonsPrice = 0;
+    if(type === "fries"){
+        addonsPrice = selectedAddons.reduce((s,a)=>s+a.price,0);
+        addonsText = selectedAddons.map(a=>a.name).join(", ");
+    } else {
+        if(currentRemovedIngredients.length > 0) {
+            removedText = "بدون: " + currentRemovedIngredients.join("، ");
+        }
+    }
 
-if(type === "fries"){
-addonsPrice = selectedAddons.reduce((s,a)=>s+a.price,0);
+    let item = cart.find(i => i.type === type && i.addons === addonsText && i.removed === removedText);
+
+    if(item){
+        item.qty++;
+    }else{
+        cart.push({
+            name,
+            price: price + addonsPrice,
+            qty: 1,
+            type,
+            addons: addonsText,
+            removed: removedText
+        });
+    }
+    render();
 }
 
-let item = cart.find(i=>i.name===name);
-
-if(item){
-item.qty++;
-}else{
-cart.push({
-name,
-price: price + addonsPrice,
-qty:1,
-type,
-addons: selectedAddons.map(a=>a.name).join(", ")
-});
+function minus(index){
+    cart[index].qty--;
+    if(cart[index].qty <= 0){
+        cart.splice(index, 1);
+    }
+    render();
 }
 
-render();
+function plus(index){
+    cart[index].qty++;
+    render();
 }
 
-// ➖ کم کردن
-function minus(name){
-
-let item = cart.find(i=>i.name===name);
-if(!item) return;
-
-item.qty--;
-
-if(item.qty<=0){
-cart = cart.filter(i=>i.name!==name);
-}
-
-render();
-}
-
-// 🧾 نمایش سبد
 function render(){
+    const cartContainer = document.getElementById("cart");
+    const totalContainer = document.getElementById("total-container");
+    
+    if(cart.length === 0) {
+        cartContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">سبد خرید شما در حال حاضر خالی است. 🛒</div>`;
+        totalContainer.innerHTML = "";
+        return;
+    }
 
-document.getElementById("cart").innerHTML =
-cart.map(i=>`
-<div>
-<b>${i.name}</b> × ${i.qty}<br>
-<small>${i.addons || ""}</small><br>
-💰 ${(i.price*i.qty).toLocaleString()}<br>
+    cartContainer.innerHTML = cart.map((i, index)=>`
+        <div class="cart-item">
+            <div class="cart-item-header">
+                <span class="cart-item-name">${i.name}</span>
+                <div class="cart-item-actions">
+                    <button class="btn-qty btn-secondary" onclick="minus(${index})">-</button>
+                    <span style="font-weight:700; width:20px; text-align:center;">${i.qty}</span>
+                    <button class="btn-qty btn-secondary" onclick="plus(${index})">+</button>
+                </div>
+            </div>
+            ${i.addons ? `<div class="addons-items">➕ ${i.addons}</div>` : ""}
+            ${i.removed ? `<div class="removed-items">❌ ${i.removed}</div>` : ""}
+            <div style="text-align:left; font-weight:600; font-size:14px; margin-top:4px; color:var(--primary);">💰 ${(i.price * i.qty).toLocaleString()} تومان</div>
+        </div>
+    `).join("");
 
-<button onclick="minus('${i.name}')">-</button>
-<button onclick="add('${i.name}',${i.price},'${i.type}')">+</button>
-
-<hr>
-</div>
-`).join("");
+    let total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    totalContainer.innerHTML = `
+        <div class="total-price">
+            <span>مبلغ قابل پرداخت:</span>
+            <span>${total.toLocaleString()} تومان</span>
+        </div>
+    `;
 }
 
-// 📤 ارسال به Google Sheets
-function submitOrder(){
-
-let name = document.getElementById("name").value;
-let phone = document.getElementById("phone").value;
-
-if(!name || !phone || cart.length===0){
-alert("اطلاعات کامل نیست");
-return;
-}
-
-let data = {
-name,
-phone,
-items: cart.map(i =>
-`${i.name} × ${i.qty} [${i.addons || ""}]`
-).join(" | "),
-total: cart.reduce((s,i)=>s+i.price*i.qty,0)
-};
-
-fetch("https://script.google.com/macros/s/AKfycbz57QhZQH6eXsQxJ6VIGzx3_qOQPVnkCNE6fHluThQ1CA1Yag4jEdEbWXeuC9fb9rxNwg/exec", {
-method:"POST",
-body: JSON.stringify(data)
-});
-
-alert("سفارش ثبت شد");
-
-cart=[];
 render();
-}
 
+function submitOrder(){
+    setupDeliveryDates(); 
+
+    let name = document.getElementById("name").value.trim();
+    let phone = document.getElementById("phone").value.trim();
+    let deliveryDate = document.getElementById("delivery-date").value;
+    let deliveryTime = document.getElementById("delivery-time").value;
+    let submitBtn = document.getElementById("submit-btn");
+
+    if(!deliveryDate){
+        alert("ساعت پذیرش سفارش برای امروز به پایان رسیده است. لطفا روز دیگری را برای دریافت انتخاب کنید.");
+        return;
+    }
+
+    if(!name || !phone || cart.length===0){
+        alert("لطفاً تمامی اطلاعات را کامل کنید و حداقل یک محصول به سبد خرید اضافه کنید.");
+        return;
+    }
+
+    // ⚡ ضد اسپم: دکمه سریعاً غیرفعال می‌شود تا جلوی کلیک‌های مکرر و سفارش تکراری گرفته شود
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "⏳ در حال ارسال سفارش...";
+
+    let itemsText = cart.map(i => {
+        let details = [];
+        if(i.addons) details.push(`افزودنی: ${i.addons}`);
+        if(i.removed) details.push(i.removed);
+        return `${i.name} × ${i.qty} ${details.length ? `[${details.join(' | ')}]` : ''}`;
+    }).join(" * ");
+
+    let totalAmount = cart.reduce((s,i)=>s+i.price*i.qty,0);
+
+    let data = {
+        name,
+        phone,
+        items: itemsText,
+        delivery_date: deliveryDate,  
+        delivery_time: deliveryTime,  
+        total: totalAmount
+    };
+
+    // ساخت فاکتور متنی شیک برای نمایش سریع به کاربر
+    let receiptHtml = `
+        <div class="receipt-title">📋 جزئیات فاکتور شماره سیستم</div>
+        <b>👤 تحویل گیرنده:</b> ${name}<br>
+        <b>📞 شماره تماس:</b> ${phone}<br>
+        <b>🛍 اقلام سفارش:</b> ${itemsText.replace(/\*/g, '<br>🔹 ')}<br>
+        <b>📅 زمان تحویل:</b> ${deliveryDate} ساعت ${deliveryTime}<br>
+        <b style="color:var(--primary); font-size:16px;">💵 جمع کل: ${totalAmount.toLocaleString()} تومان</b>
+    `;
+
+    fetch("https://script.google.com/macros/s/AKfycbz57QhZQH6eXsQxJ6VIGzx3_qOQPVnkCNE6fHluThQ1CA1Yag4jEdEbWXeuC9fb9rxNwg/exec", {
+        method:"POST",
+        body: JSON.stringify(data)
+    }).then(() => {
+        // باز کردن پاپ‌آپ سریع اطلاعات فاکتور
+        document.getElementById("receipt-details").innerHTML = receiptHtml;
+        document.getElementById("success-modal").style.display = "flex";
+        
+        // ریست کردن فرم
+        cart=[];
+        render();
+        document.getElementById("name").value = "";
+        document.getElementById("phone").value = "";
+    }).catch(err => {
+        alert("متاسفانه خطایی در ثبت سفارش رخ داد.");
+        console.error(err);
+    }).finally(() => {
+        // فعال‌سازی مجدد دکمه بعد از پایان عملیات کامپیوتر
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "🚀 ثبت نهایی سفارش";
+    });
+}
 </script>
 
 </body>
 </html>
+
+```
