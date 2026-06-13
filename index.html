@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ساندی سندویچ</title>
+
+<style>
+body{font-family:sans-serif;background:#f5f5f5;margin:0}
+header{background:#ff6b00;color:#fff;padding:20px;text-align:center}
+
+.container{max-width:900px;margin:auto;padding:20px}
+
+.card{
+background:#fff;
+padding:12px;
+margin:10px 0;
+border-radius:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+button{
+background:#ff6b00;
+color:#fff;
+border:none;
+padding:6px 10px;
+border-radius:8px;
+cursor:pointer;
+margin:2px;
+}
+
+.cart{
+background:#fff;
+padding:15px;
+margin-top:20px;
+border-radius:10px;
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:#fff;
+padding:20px;
+border-radius:10px;
+width:340px;
+}
+
+small{color:#555}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🍔 ساندی سندویچ</h1>
+</header>
+
+<div class="container">
+
+<h2>منو</h2>
+
+<!-- 🐔 مرغ (غیر قابل حذف) -->
+<div class="card">
+<span>ساندویچ مرغ - 540000</span>
+<div>
+<button onclick="openView('chicken')">👁 سفارشی‌سازی</button>
+<button onclick="add('مرغ',540000,'chicken')">افزودن</button>
+</div>
+</div>
+
+<!-- 🦃 بوقلمون (غیر قابل حذف) -->
+<div class="card">
+<span>ساندویچ بوقلمون - 620000</span>
+<div>
+<button onclick="openView('turkey')">👁 سفارشی‌سازی</button>
+<button onclick="add('بوقلمون',620000,'turkey')">افزودن</button>
+</div>
+</div>
+
+<!-- 🍟 سیب زمینی -->
+<div class="card">
+<span>سیب زمینی - 50000</span>
+<div>
+<button onclick="openView('fries')">👁 سفارشی‌سازی</button>
+<button onclick="add('سیب زمینی',50000,'fries')">افزودن</button>
+</div>
+</div>
+
+<!-- 🛒 -->
+<div class="cart">
+
+<h2>🛒 سبد خرید</h2>
+<div id="cart"></div>
+
+<input id="name" placeholder="نام">
+<input id="phone" placeholder="شماره">
+
+<button onclick="submitOrder()">ثبت سفارش</button>
+
+</div>
+
+</div>
+
+<!-- 👁 modal -->
+<div class="modal" id="modal">
+<div class="modal-content">
+
+<h3>سفارشی‌سازی</h3>
+<div id="ingredients"></div>
+
+<hr>
+<h4>➕ افزودنی‌ها</h4>
+<div id="addons"></div>
+
+<br>
+<button onclick="closeView()">بستن</button>
+
+</div>
+</div>
+
+<script>
+
+let cart = [];
+let currentType = null;
+
+// 🟢 مواد ثابت (قابل حذف نیستند برای مرغ و بوقلمون)
+const baseIngredients = {
+chicken:[
+"مرغ 300 گرم",
+"سس مخصوص",
+"خیارشور",
+"کاهو",
+"گوجه",
+"نان"
+],
+turkey:[
+"بوقلمون 300 گرم",
+"سس مخصوص",
+"خیارشور",
+"کاهو",
+"گوجه",
+"نان"
+],
+fries:[
+"سیب زمینی تازه"
+]
+};
+
+// 🟢 افزودنی‌ها فقط برای سیب زمینی
+const friesAddons = [
+{name:"ژامبون", price:120000},
+{name:"سس تند", price:5000},
+{name:"ابرکامبو (سس قارچ + سس تند + سوسیس + پنیر)", price:170000}
+];
+
+let selectedAddons = [];
+
+// 👁 باز کردن
+function openView(type){
+currentType = type;
+
+renderModal();
+
+document.getElementById("modal").style.display="flex";
+}
+
+function closeView(){
+document.getElementById("modal").style.display="none";
+}
+
+// 🧾 نمایش محتویات
+function renderModal(){
+
+let html = "";
+
+// فقط برای سیب زمینی ادیت
+if(currentType === "fries"){
+html += "<b>سیب زمینی</b><br>غیر قابل حذف<br><br>";
+
+document.getElementById("addons").innerHTML =
+friesAddons.map((a,i)=>`
+<label>
+<input type="checkbox" onchange="toggleAddon(${i})">
+${a.name} (+${a.price.toLocaleString()})
+</label><br>
+`).join("");
+
+}else{
+
+html += baseIngredients[currentType].map(i=>`• ${i}`).join("<br>");
+document.getElementById("addons").innerHTML = "فقط برای سیب زمینی فعال است";
+}
+
+document.getElementById("ingredients").innerHTML = html;
+}
+
+// 🟡 افزودنی سیب زمینی
+function toggleAddon(i){
+
+let addon = friesAddons[i];
+
+let index = selectedAddons.findIndex(a=>a.name===addon.name);
+
+if(index >= 0){
+selectedAddons.splice(index,1);
+}else{
+selectedAddons.push(addon);
+}
+}
+
+// ➕ افزودن
+function add(name, price, type){
+
+let addonsPrice = 0;
+
+if(type === "fries"){
+addonsPrice = selectedAddons.reduce((s,a)=>s+a.price,0);
+}
+
+let item = cart.find(i=>i.name===name);
+
+if(item){
+item.qty++;
+}else{
+cart.push({
+name,
+price: price + addonsPrice,
+qty:1,
+type,
+addons: selectedAddons.map(a=>a.name).join(", ")
+});
+}
+
+render();
+}
+
+// ➖ کم کردن
+function minus(name){
+
+let item = cart.find(i=>i.name===name);
+if(!item) return;
+
+item.qty--;
+
+if(item.qty<=0){
+cart = cart.filter(i=>i.name!==name);
+}
+
+render();
+}
+
+// 🧾 نمایش سبد
+function render(){
+
+document.getElementById("cart").innerHTML =
+cart.map(i=>`
+<div>
+<b>${i.name}</b> × ${i.qty}<br>
+<small>${i.addons || ""}</small><br>
+💰 ${(i.price*i.qty).toLocaleString()}<br>
+
+<button onclick="minus('${i.name}')">-</button>
+<button onclick="add('${i.name}',${i.price},'${i.type}')">+</button>
+
+<hr>
+</div>
+`).join("");
+}
+
+// 📤 ارسال به Google Sheets
+function submitOrder(){
+
+let name = document.getElementById("name").value;
+let phone = document.getElementById("phone").value;
+
+if(!name || !phone || cart.length===0){
+alert("اطلاعات کامل نیست");
+return;
+}
+
+let data = {
+name,
+phone,
+items: cart.map(i =>
+`${i.name} × ${i.qty} [${i.addons || ""}]`
+).join(" | "),
+total: cart.reduce((s,i)=>s+i.price*i.qty,0)
+};
+
+fetch("https://script.google.com/macros/s/AKfycbz57QhZQH6eXsQxJ6VIGzx3_qOQPVnkCNE6fHluThQ1CA1Yag4jEdEbWXeuC9fb9rxNwg/exec", {
+method:"POST",
+body: JSON.stringify(data)
+});
+
+alert("سفارش ثبت شد");
+
+cart=[];
+render();
+}
+
+</script>
+
+</body>
+</html>
