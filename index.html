@@ -18,7 +18,7 @@ margin:10px 0;
 border-radius:10px;
 display:flex;
 justify-content:space-between;
-align-items:center
+align-items:center;
 }
 
 button{
@@ -35,7 +35,7 @@ margin:2px;
 background:#fff;
 padding:15px;
 margin-top:20px;
-border-radius:10px
+border-radius:10px;
 }
 
 .item-row{
@@ -164,7 +164,7 @@ html += `
 document.getElementById("cart").innerHTML = html;
 }
 
-// 📅 تاریخ (امروز/فردا/پس‌فردا)
+// 📅 تاریخ (امروز / فردا / پس‌فردا)
 const dateSelect = document.getElementById("deliveryDate");
 const names = ["امروز", "فردا", "پس‌فردا"];
 
@@ -188,20 +188,27 @@ timeSelect.innerHTML += `<option>${h}:30</option>`;
 }
 }
 
-// ⛔ محدودیت بعد از 11
-function checkTime(){
+// ⛔ فقط برای امروز بعد از 11 بسته شود
+function checkOrderTime(){
+
+let selectedDate = document.getElementById("deliveryDate").value;
+
 let now = new Date();
-if(now.getHours() >= 11){
-alert("⛔ سفارش برای امروز بسته شده است");
+let today = new Date().toISOString().split("T")[0];
+let hour = now.getHours();
+
+if(selectedDate === today && hour >= 11){
+alert("⛔ سفارش امروز بعد از ساعت 11 بسته شده است");
 return false;
 }
+
 return true;
 }
 
 // 📤 ارسال به Google Sheets
 function submitOrder(){
 
-if(!checkTime()) return;
+if(!checkOrderTime()) return;
 
 let name = document.getElementById("name").value;
 let phone = document.getElementById("phone").value;
