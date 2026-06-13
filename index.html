@@ -49,6 +49,14 @@ border-bottom:1px solid #eee;
 .qty-controls button{
 padding:4px 8px;
 }
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border:1px solid #ddd;
+border-radius:8px;
+}
 </style>
 </head>
 
@@ -77,12 +85,17 @@ padding:4px 8px;
 <button onclick="add('سیب زمینی',50000)">افزودن</button>
 </div>
 
-<!-- 🛒 -->
+<!-- 🛒 سبد خرید -->
 <div class="cart">
 
 <h2>🛒 سبد خرید</h2>
-
 <div id="cart"></div>
+
+<label>تاریخ تحویل</label>
+<select id="deliveryDate"></select>
+
+<label>ساعت تحویل</label>
+<select id="deliveryTime"></select>
 
 <input id="name" placeholder="نام">
 <input id="phone" placeholder="شماره">
@@ -127,7 +140,7 @@ cart = cart.filter(i => i.name !== name);
 render();
 }
 
-// 🧾 نمایش
+// 🧾 نمایش سبد
 function render(){
 
 let html = "";
@@ -151,8 +164,44 @@ html += `
 document.getElementById("cart").innerHTML = html;
 }
 
-// 📤 ثبت سفارش
+// 📅 تاریخ (امروز/فردا/پس‌فردا)
+const dateSelect = document.getElementById("deliveryDate");
+const names = ["امروز", "فردا", "پس‌فردا"];
+
+for(let i=0;i<3;i++){
+let d = new Date();
+d.setDate(d.getDate()+i);
+
+dateSelect.innerHTML += `
+<option value="${d.toISOString().split("T")[0]}">
+${names[i]}
+</option>`;
+}
+
+// ⏰ ساعت (12 تا 15)
+const timeSelect = document.getElementById("deliveryTime");
+
+for(let h=12; h<=15; h++){
+timeSelect.innerHTML += `<option>${h}:00</option>`;
+if(h < 15){
+timeSelect.innerHTML += `<option>${h}:30</option>`;
+}
+}
+
+// ⛔ محدودیت بعد از 11
+function checkTime(){
+let now = new Date();
+if(now.getHours() >= 11){
+alert("⛔ سفارش برای امروز بسته شده است");
+return false;
+}
+return true;
+}
+
+// 📤 ارسال به Google Sheets
 function submitOrder(){
+
+if(!checkTime()) return;
 
 let name = document.getElementById("name").value;
 let phone = document.getElementById("phone").value;
@@ -166,7 +215,9 @@ let data = {
 name,
 phone,
 items: cart.map(i => `${i.name} × ${i.qty}`).join(", "),
-total: cart.reduce((s,i)=>s+i.price*i.qty,0)
+total: cart.reduce((s,i)=>s+i.price*i.qty,0),
+date: document.getElementById("deliveryDate").value,
+time: document.getElementById("deliveryTime").value
 };
 
 fetch("https://script.google.com/macros/s/AKfycbz57QhZQH6eXsQxJ6VIGzx3_qOQPVnkCNE6fHluThQ1CA1Yag4jEdEbWXeuC9fb9rxNwg/exec", {
